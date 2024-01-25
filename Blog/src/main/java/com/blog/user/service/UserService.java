@@ -1,9 +1,11 @@
 package com.blog.user.service;
 
 import com.blog.exception.UserAlreadyExistsException;
+import com.blog.exception.UserNotActivatedException;
 import com.blog.role.entity.RoleEntity;
 import com.blog.role.repository.RoleRepository;
 import com.blog.user.dto.UserDtoCreate;
+import com.blog.user.dto.UserDtoPasswordReset;
 import com.blog.user.dto.UserDtoPatch;
 import com.blog.user.dto.UserDtoResponse;
 import com.blog.user.entity.UserEntity;
@@ -43,8 +45,11 @@ public class UserService {
     @Transactional
     public String saveUser(UserDtoCreate userDtoCreate){
         try{
+            if (userRepository.findByUsername(userDtoCreate.getUsername()).isPresent()){
+                throw new UserAlreadyExistsException("User with this username already exists");
+            }
             if (userRepository.findByEmail(userDtoCreate.getEmail().toLowerCase()).isPresent()){
-                throw new UserAlreadyExistsException("User with email: "+userDtoCreate.getEmail()+" already exists");
+                throw new UserAlreadyExistsException("User with this email already exists");
             }
             UserEntity userEntity=userMapper.mapToEntity(userDtoCreate);
             userEntity.setEmail(userEntity.getEmail().toLowerCase());
@@ -74,11 +79,15 @@ public class UserService {
         userRepository.deleteById(id);
     }
     @Transactional
-    public UserDtoResponse patchUser(UserDtoPatch patch,Long id){
+    public UserDtoResponse patchUser(UserDtoPatch patch,Long id) throws UserAlreadyExistsException, UserNotActivatedException {
         UserEntity userEntity=userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("User not found with id: "+id));
-        Optional.ofNullable(patch.getFirstName()).ifPresent(userEntity::setFirstName);
-        Optional.ofNullable(patch.getSecondName()).ifPresent(userEntity::setSecondName);
-        Optional.ofNullable(patch.getPassword()).ifPresent(userEntity::setPassword);
+        if (!userEntity.isEnabled()){
+            throw new UserNotActivatedException("User is not activated");
+        }
+        if (userRepository.findByUsername(userEntity.getUsername()).isPresent()){
+            throw new UserAlreadyExistsException("User with this username already exists");
+        }
+        Optional.ofNullable(patch.getUsername()).ifPresent(userEntity::setUsername);
         return userMapper.mapToDto(userEntity);
     }
     @Transactional
@@ -96,5 +105,15 @@ public class UserService {
         userRepository.save(user);
         verificationTokenRepository.delete(verificationToken);
         return "Account activated";
+    }
+
+    public String resetPassword(UserDtoPasswordReset userDtoPasswordReset,Long id) throws EntityNotFoundException, UserNotActivatedException {
+        UserEntity userEntity=userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("User with id: "+id+" not found"));
+        if (!userEntity.isEnabled()){
+            throw new UserNotActivatedException("User is not activated");
+        }
+        userEntity.setPassword(userDtoPasswordReset.getPassword());
+        userRepository.save(userEntity);
+        return "Password changed";
     }
 }

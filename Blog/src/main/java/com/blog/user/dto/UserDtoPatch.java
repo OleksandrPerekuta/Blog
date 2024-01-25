@@ -8,7 +8,5 @@ import lombok.Setter;
 @Setter
 @RequiredArgsConstructor
 public class UserDtoPatch {
-    private String firstName;
-    private String secondName;
-    private String password;
+    private String username;
 }

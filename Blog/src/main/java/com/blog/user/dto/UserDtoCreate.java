@@ -12,10 +12,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class UserDtoCreate {
-    @NotBlank(message = "first name must not be null")
-    private String firstName;
-    @NotBlank(message = "second name must not be null")
-    private String secondName;
+    @NotBlank(message = "username must not be null")
+    private String username;
     @NotBlank(message = "email must not be null")
     @Email
     private String email;

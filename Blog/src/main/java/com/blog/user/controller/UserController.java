@@ -2,22 +2,21 @@ package com.blog.user.controller;
 
 import com.blog.exception.NullValueException;
 import com.blog.user.dto.UserDtoCreate;
+import com.blog.user.dto.UserDtoPasswordReset;
 import com.blog.user.dto.UserDtoPatch;
 import com.blog.user.dto.UserDtoResponse;
-import com.blog.user.repository.UserRepository;
 import com.blog.user.service.UserService;
-import com.blog.verificationToken.repository.VerificationTokenRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.Errors;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequestMapping("/users")
 @RestController
@@ -37,17 +36,19 @@ public class UserController {
         }
     }
     @PatchMapping("/{id}")
-    public ResponseEntity<UserDtoResponse> changesUser(@PathVariable Long id, @RequestBody @Valid UserDtoPatch userDtoPatch){
-        return new ResponseEntity<>(userService.patchUser(userDtoPatch,id),HttpStatus.OK);
+    public ResponseEntity<?> changesUser(@PathVariable Long id, @RequestBody @Valid UserDtoPatch userDtoPatch){
+        try{
+            return new ResponseEntity<>(userService.patchUser(userDtoPatch,id),HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        }
     }
     @PostMapping
-    public ResponseEntity<String> saveUser(@RequestBody @Valid UserDtoCreate userDtoCreate, Errors errors) throws NullValueException{
-        if (errors.hasErrors()) {
-            String message = Arrays.toString(errors.getAllErrors().stream()
-                            .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                            .toArray())
-                    .replaceAll("^\\[|\\]$", "")
-                    .replaceAll(",\\s", ",\n");
+    public ResponseEntity<String> saveUser(@RequestBody @Valid UserDtoCreate userDtoCreate, BindingResult bindingResult) throws NullValueException{
+        if (bindingResult.hasErrors()){
+            String message = bindingResult.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.joining(",\n"));
             return new ResponseEntity<>(message,HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(userService.saveUser(userDtoCreate),HttpStatus.CREATED);
@@ -60,5 +61,30 @@ public class UserController {
     @PostMapping("/activate")
     public ResponseEntity<String> activateUser(@RequestParam("token") String token){
         return new ResponseEntity<>(userService.activateUser(token),HttpStatus.OK);
+    }
+    @PatchMapping("/password_reset/{id}")
+    public ResponseEntity<String> changePassword(
+            @RequestBody @Valid UserDtoPasswordReset userDtoPasswordReset,
+            @PathVariable Long id,
+            BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            String message = bindingResult.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.joining(",\n"));
+            return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            return new ResponseEntity<>(userService.resetPassword(userDtoPasswordReset, id), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getAllErrors().stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .collect(Collectors.joining(",\n"));
+        return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 }
