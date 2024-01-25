@@ -1,6 +1,6 @@
-package com.blog.verificationToken;
+package com.blog.verificationToken.entity;
 
-import com.blog.user.UserEntity;
+import com.blog.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,7 +22,7 @@ public class VerificationTokenEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
     @PrePersist
-    private void setExpiratioDate(){
+    private void initializeValues(){
         expirationDate= OffsetDateTime.now().plusDays(1);
     }
 }

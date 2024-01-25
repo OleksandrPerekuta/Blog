@@ -4,7 +4,7 @@ create table user (
                       second_name varchar(255) not null,
                       email varchar(255) not null,
                       password varchar(255) not null,
-                      is_enabled boolean not null,
-                      role_id bigint not null ,
-                      foreign key (role_id) references role(id)
+                      is_enabled boolean not null
+#                       role_id bigint not null ,
+#                       foreign key (role_id) references role(id)
 );

@@ -1,7 +1,7 @@
-package com.blog.user;
+package com.blog.user.entity;
 
-import com.blog.role.RoleEntity;
-import com.blog.verificationToken.VerificationTokenEntity;
+import com.blog.user_role.entity.UserRoleEntity;
+import com.blog.verificationToken.entity.VerificationTokenEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,9 +23,8 @@ public class UserEntity {
     private String email;
     private String password;
     private boolean isEnabled;
-    @ManyToOne(optional = false,fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id")
-    private RoleEntity role;
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private List<UserRoleEntity> userRoles;
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<VerificationTokenEntity> tokens;
