@@ -27,11 +27,6 @@ public class RoleService {
         RoleEntity entity=roleRepository.findById(id).orElseThrow(()->new EntityNotFoundException("Role not found with id: "+id));
         return roleMapper.mapToDto(entity);
     }
-    @Transactional(readOnly = true)
-    public RoleDtoResponse getRoleByName(String name){
-        RoleEntity entity=roleRepository.getByName(name).orElseThrow(()->new EntityNotFoundException("Role not found with name: "+name));
-        return roleMapper.mapToDto(entity);
-    }
     @Transactional
     public void saveRole(RoleDtoCreate roleDto){
         roleRepository.save(roleMapper.mapToEntity(roleDto));
