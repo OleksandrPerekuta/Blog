@@ -1,7 +1,6 @@
-package com.blog.role;
+package com.blog.role.entity;
 
-import com.blog.user.UserEntity;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.blog.user_role.entity.UserRoleEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,7 +17,6 @@ public class RoleEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    @JsonIgnore
     @OneToMany(mappedBy = "role", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<UserEntity> users;
+    private List<UserRoleEntity> userRoles;
 }
