@@ -7,12 +7,16 @@ import com.blog.user.dto.UserDtoResponse;
 import com.blog.user.repository.UserRepository;
 import com.blog.user.service.UserService;
 import com.blog.verificationToken.repository.VerificationTokenRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
 import java.util.List;
 
 @RequestMapping("/users")
@@ -25,8 +29,12 @@ public class UserController {
         return new ResponseEntity<>(userService.getAll(), HttpStatus.OK);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<UserDtoResponse> getUserById(@PathVariable Long id){
-        return new ResponseEntity<>(userService.getUserById(id),HttpStatus.OK);
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+        try {
+            return new ResponseEntity<>(userService.getUserById(id),HttpStatus.OK);
+        }catch (EntityNotFoundException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        }
     }
     @PatchMapping("/{id}")
     public ResponseEntity<UserDtoResponse> changesUser(@PathVariable Long id, @RequestBody @Valid UserDtoPatch userDtoPatch){
@@ -35,7 +43,12 @@ public class UserController {
     @PostMapping
     public ResponseEntity<String> saveUser(@RequestBody @Valid UserDtoCreate userDtoCreate, Errors errors) throws NullValueException{
         if (errors.hasErrors()) {
-            throw new NullValueException(errors);
+            String message = Arrays.toString(errors.getAllErrors().stream()
+                            .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                            .toArray())
+                    .replaceAll("^\\[|\\]$", "")
+                    .replaceAll(",\\s", ",\n");
+            return new ResponseEntity<>(message,HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(userService.saveUser(userDtoCreate),HttpStatus.CREATED);
     }

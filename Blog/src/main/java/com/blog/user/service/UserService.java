@@ -36,7 +36,7 @@ public class UserService {
         return users.stream().map(userMapper::mapToDto).toList();
     }
     @Transactional(readOnly = true)
-    public UserDtoResponse getUserById(Long id){
+    public UserDtoResponse getUserById(Long id) throws EntityNotFoundException{
         UserEntity entity=userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("User with id: "+id+" not found"));
         return userMapper.mapToDto(entity);
     }
@@ -70,6 +70,7 @@ public class UserService {
     }
     @Transactional
     public void deleteUser(Long id){
+        verificationTokenRepository.deleteByUserId(id);
         userRepository.deleteById(id);
     }
     @Transactional
@@ -84,6 +85,7 @@ public class UserService {
     public String activateUser(String token){
         VerificationTokenEntity verificationToken = verificationTokenRepository.findByToken(token).orElseThrow(() -> new RuntimeException("No token found"));
         if (OffsetDateTime.now().isAfter(verificationToken.getExpirationDate())) {
+            verificationTokenRepository.delete(verificationToken);
             return "token is not valid anymore";
         }
         if (verificationToken.getUser().isEnabled()) {
@@ -92,6 +94,7 @@ public class UserService {
         UserEntity user = userRepository.findById(verificationToken.getUser().getId()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         user.setEnabled(true);
         userRepository.save(user);
+        verificationTokenRepository.delete(verificationToken);
         return "Account activated";
     }
 }
