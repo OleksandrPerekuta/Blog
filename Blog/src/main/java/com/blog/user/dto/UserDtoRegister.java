@@ -11,11 +11,11 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class UserDtoCreate {
+public class UserDtoRegister {
     @NotBlank(message = "username must not be null")
     private String username;
     @NotBlank(message = "email must not be null")
-    @Email
+    @Email(message = "incorrect email format")
     private String email;
     @NotBlank(message = "password must not be null")
     private String password;

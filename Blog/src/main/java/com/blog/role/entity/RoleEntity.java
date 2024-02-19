@@ -1,22 +1,28 @@
 package com.blog.role.entity;
 
-import com.blog.user_role.entity.UserRoleEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
+import org.springframework.security.core.GrantedAuthority;
 
 @Entity(name = "role")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoleEntity {
+public class RoleEntity implements GrantedAuthority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    @OneToMany(mappedBy = "role", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<UserRoleEntity> userRoles;
+
+    @Override
+    public String getAuthority() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
