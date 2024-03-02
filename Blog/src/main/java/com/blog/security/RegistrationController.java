@@ -1,5 +1,6 @@
 package com.blog.security;
 
+import com.blog.user.dto.AdminDtoRegister;
 import com.blog.user.dto.UserDtoRegister;
 import com.blog.user.dto.UserDtoLogin;
 import com.blog.user.service.UserService;
@@ -20,6 +21,15 @@ public class RegistrationController {
     public ResponseEntity<String> registerUser(@RequestBody @Valid UserDtoRegister userDto) {
         try {
             String activationUrl= userService.createUser(userDto);
+            return new ResponseEntity<>("registration succeed, activate your account, link is here : " + activationUrl, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+        }
+    }
+    @PostMapping("/register/admin")
+    public ResponseEntity<String> registerAdmin(@RequestBody @Valid AdminDtoRegister adminDto) {
+        try {
+            String activationUrl= userService.createAdmin(adminDto);
             return new ResponseEntity<>("registration succeed, activate your account, link is here : " + activationUrl, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);

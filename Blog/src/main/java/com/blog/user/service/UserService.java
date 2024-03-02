@@ -1,5 +1,6 @@
 package com.blog.user.service;
 
+import com.blog.exception.TokenException;
 import com.blog.exception.UserAlreadyExistsException;
 import com.blog.exception.UserNotActivatedException;
 import com.blog.role.entity.RoleEntity;
@@ -19,6 +20,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.Set;
 import java.util.UUID;
@@ -34,31 +39,53 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
 
 
+    @Transactional
+    public String createUser(UserDtoRegister userDtoRegister) throws UserAlreadyExistsException {
+        if (userRepository.findByUsername(userDtoRegister.getUsername()).isPresent()) {
+            throw new UserAlreadyExistsException("User with this username already exists");
+        }
+        if (userRepository.findByEmail(userDtoRegister.getEmail().toLowerCase()).isPresent()) {
+            throw new UserAlreadyExistsException("User with this email already exists");
+        }
+        UserEntity userEntity = userMapper.mapToEntity(userDtoRegister);
+        userEntity.setEmail(userEntity.getEmail().toLowerCase());
+        RoleEntity roleEntity = roleRepository.getByName("ROLE_USER").orElseThrow(() -> new EntityNotFoundException("Role with name \"USER\" is not found"));
+        userEntity.setRoles(Set.of(roleEntity));
+
+        userRepository.save(userEntity);
+        return generateLinkWithVerificationToken(userEntity);
+    }
 
     @Transactional
-    public String createUser(UserDtoRegister userDtoRegister) throws UserAlreadyExistsException{
-            if (userRepository.findByUsername(userDtoRegister.getUsername()).isPresent()){
-                throw new UserAlreadyExistsException("User with this username already exists");
-            }
-            if (userRepository.findByEmail(userDtoRegister.getEmail().toLowerCase()).isPresent()){
-                throw new UserAlreadyExistsException("User with this email already exists");
-            }
-            UserEntity userEntity=userMapper.mapToEntity(userDtoRegister);
-            userEntity.setEmail(userEntity.getEmail().toLowerCase());
-            RoleEntity roleEntity=roleRepository.getByName("USER").orElseThrow(()->new EntityNotFoundException("Role with name \"USER\" is not found"));
-            userEntity.setRoles(Set.of(roleEntity));
+    public String createAdmin(AdminDtoRegister adminDtoRegister) throws UserAlreadyExistsException, IOException, TokenException {
+        if (userRepository.findByUsername(adminDtoRegister.getUsername()).isPresent()) {
+            throw new UserAlreadyExistsException("User with this username already exists");
+        }
+        if (userRepository.findByEmail(adminDtoRegister.getEmail().toLowerCase()).isPresent()) {
+            throw new UserAlreadyExistsException("User with this email already exists");
+        }
+        String key = new String(Files.readAllBytes(Path.of("src/main/resources/key.txt")));
+        System.out.println("KEY IS " + key);
+        if (!adminDtoRegister.getSecret().equals(key)) {
+            throw new TokenException("Key is not correct");
+        }
+        UserEntity userEntity = userMapper.mapToEntity(adminDtoRegister);
+        userEntity.setEmail(userEntity.getEmail().toLowerCase());
+        RoleEntity userRole = roleRepository.getByName("ROLE_USER").orElseThrow(() -> new EntityNotFoundException("Role with name \"USER\" is not found"));
+        RoleEntity adminRole = roleRepository.getByName("ROLE_ADMIN").orElseThrow(() -> new EntityNotFoundException("Role with name \"ADMIN\" is not found"));
+        userEntity.setRoles(Set.of(userRole,adminRole));
+        userRepository.save(userEntity);
+        return generateLinkWithVerificationToken(userEntity);
+    }
 
-            userRepository.save(userEntity);
-            return generateLinkWithVerificationToken(userEntity);
-    }
     @Bean
-    public void initialRoleValues(){
-        roleRepository.save(new RoleEntity(1L,"ROLE_ADMIN"));
-        roleRepository.save(new RoleEntity(2L,"ROLE_USER"));
+    public void initialRoleValues() {
+        roleRepository.save(new RoleEntity(1L, "ROLE_ADMIN"));
+        roleRepository.save(new RoleEntity(2L, "ROLE_USER"));
     }
-    private String generateLinkWithVerificationToken(UserEntity user){
+
+    private String generateLinkWithVerificationToken(UserEntity user) {
         String token = UUID.randomUUID().toString();
-        System.out.println("created token: "+token);
         OffsetDateTime expirationDateTime = OffsetDateTime.now().plusHours(1);
 
         VerificationTokenEntity verificationToken = new VerificationTokenEntity();
@@ -71,7 +98,7 @@ public class UserService {
 
 
     @Transactional
-    public String activateUser(String token){
+    public String activateUser(String token) {
         VerificationTokenEntity verificationToken = verificationTokenRepository.findByToken(token).orElseThrow(() -> new RuntimeException("No token found"));
         if (OffsetDateTime.now().isAfter(verificationToken.getExpirationDate())) {
             verificationTokenRepository.delete(verificationToken);
@@ -87,9 +114,9 @@ public class UserService {
         return "Account activated";
     }
 
-    public String resetPassword(UserDtoPasswordReset userDtoPasswordReset,Long id) throws EntityNotFoundException, UserNotActivatedException {
-        UserEntity userEntity=userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("User with id: "+id+" not found"));
-        if (!userEntity.isEnabled()){
+    public String resetPassword(UserDtoPasswordReset userDtoPasswordReset, Long id) throws EntityNotFoundException, UserNotActivatedException {
+        UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User with id: " + id + " not found"));
+        if (!userEntity.isEnabled()) {
             throw new UserNotActivatedException("User is not activated");
         }
         userEntity.setPassword(userDtoPasswordReset.getPassword());
@@ -98,9 +125,9 @@ public class UserService {
     }
 
     public AuthenticationTokenResponse authenticateUser(UserDtoLogin request) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(),request.getPassword()));
-        UserEntity user=userRepository.findByEmail(request.getEmail()).orElseThrow(()->new EntityNotFoundException("User not found"));
-        String jwtToken=jwtService.generateToken(user);
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+        UserEntity user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        String jwtToken = jwtService.generateToken(user);
         return AuthenticationTokenResponse.builder().token(jwtToken).build();
     }
 
