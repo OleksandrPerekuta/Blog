@@ -124,7 +124,7 @@ public class UserService {
         return "Password changed";
     }
 
-    public AuthenticationTokenResponse authenticateUser(UserDtoLogin request) {
+    public AuthenticationTokenResponse authenticateUser(UserDtoLogin request) throws EntityNotFoundException{
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         UserEntity user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         String jwtToken = jwtService.generateToken(user);

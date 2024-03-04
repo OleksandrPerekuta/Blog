@@ -1,5 +1,6 @@
 package com.blog.user.entity;
 
+import com.blog.post.entity.PostEntity;
 import com.blog.role.entity.RoleEntity;
 import com.blog.verificationToken.entity.VerificationTokenEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -35,6 +36,9 @@ public class UserEntity implements UserDetails {
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<VerificationTokenEntity> tokens;
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private List<PostEntity> posts;
     @PrePersist
     private void setEnabled(){isEnabled=false;}
 

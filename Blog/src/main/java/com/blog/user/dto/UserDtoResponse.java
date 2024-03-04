@@ -12,7 +12,5 @@ import lombok.Setter;
 public class UserDtoResponse {
     private Long id;
     private String username;
-    private String email;
-    private String password;
     private boolean isEnabled;
 }

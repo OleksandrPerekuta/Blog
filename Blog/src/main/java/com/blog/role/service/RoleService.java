@@ -41,4 +41,8 @@ public class RoleService {
         entity.setName(patch.getName());
         return roleMapper.mapToDto(entity);
     }
+    @Transactional
+    public RoleEntity getRoleEntityByName(String name){
+        return roleRepository.getByName(name).orElseThrow(()->new EntityNotFoundException("Role not found with name: "+name));
+    }
 }
