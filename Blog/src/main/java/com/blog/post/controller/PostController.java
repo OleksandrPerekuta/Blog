@@ -39,6 +39,8 @@ public class PostController {
             return new ResponseEntity<>(errors.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage),HttpStatus.BAD_REQUEST);
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println(authentication.isAuthenticated());
+        System.out.println(authentication.getCredentials());
         return new ResponseEntity<>(postService.savePost(postDtoRequest, (UserDetails) authentication.getPrincipal()),HttpStatus.CREATED);
     }
 

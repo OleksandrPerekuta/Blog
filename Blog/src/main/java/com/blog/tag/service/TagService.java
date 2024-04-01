@@ -35,4 +35,13 @@ public class TagService {
     public void deleteTag(Long id){
         tagRepository.deleteById(id);
     }
+    @Transactional
+    public TagEntity getOrCreateByName(String name){
+        if (tagRepository.findByName(name).isEmpty()){
+            this.saveTag(new TagDtoCreation(name));
+        }
+        return tagRepository.findByName(name)
+                .orElseThrow(()->new EntityNotFoundException("Tag not found with name: "+name));
+    }
+
 }

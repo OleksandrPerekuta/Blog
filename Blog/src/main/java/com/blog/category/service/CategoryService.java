@@ -35,4 +35,9 @@ public class CategoryService {
     public void deleteCategory(Long id){
         categoryRepository.deleteById(id);
     }
+    @Transactional
+    public CategoryDtoResponse getByName(String name){
+        CategoryEntity entity=categoryRepository.findByName(name).orElseThrow(()->new EntityNotFoundException("Category not dound with name: "+name));
+        return categoryMapper.mapToDto(entity);
+    }
 }

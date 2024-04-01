@@ -1,9 +1,12 @@
 package com.blog.post.dto;
 
+import com.blog.category.entity.CategoryEntity;
+import com.blog.tag.entity.TagEntity;
 import com.blog.user.dto.UserDtoResponse;
 import lombok.*;
 
 import java.time.OffsetDateTime;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -17,4 +20,7 @@ public class PostDtoResponse {
     private OffsetDateTime publishedAt;
     private boolean isEdited;
     private UserDtoResponse user;
+    private Set<TagEntity> tags;
+    private Set<CategoryEntity> categories;
+
 }

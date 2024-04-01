@@ -7,6 +7,7 @@ import com.blog.post.entity.PostEntity;
 import com.blog.post.mapper.PostMapper;
 import com.blog.post.repository.PostRepository;
 import com.blog.role.service.RoleService;
+import com.blog.tag.service.TagService;
 import com.blog.user.entity.UserEntity;
 import com.blog.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,12 +17,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
     private final RoleService roleService;
+    private final TagService tagService;
     private final UserRepository userRepository;
     private final PostMapper postMapper;
 
@@ -34,6 +37,7 @@ public class PostService {
     @Transactional
     public PostDtoResponse savePost(PostDtoRequest postDtoRequest, UserDetails userDetails) throws EntityNotFoundException {
         PostEntity postEntity = postMapper.mapToEntity(postDtoRequest);
+        postEntity.setTags(postDtoRequest.getTags().stream().map(tagService::getOrCreateByName).collect(Collectors.toSet()));
         postEntity.setUser(userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found with username: " + userDetails.getUsername())));
         postEntity = postRepository.save(postEntity);
         return postMapper.mapToDto(postEntity);
