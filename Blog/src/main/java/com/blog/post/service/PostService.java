@@ -10,6 +10,7 @@ import com.blog.role.service.RoleService;
 import com.blog.tag.service.TagService;
 import com.blog.user.entity.UserEntity;
 import com.blog.user.repository.UserRepository;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,14 +31,14 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public PostDtoResponse getPostById(Long id) throws EntityNotFoundException {
-        PostEntity postEntity = postRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Post not found with id: " + id));
+        PostEntity postEntity = postRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Post not found with id: " + id));
         return postMapper.mapToDto(postEntity);
     }
 
     @Transactional
     public PostDtoResponse savePost(PostDtoRequest postDtoRequest, UserDetails userDetails) throws EntityNotFoundException {
         PostEntity postEntity = postMapper.mapToEntity(postDtoRequest);
-        postEntity.setTags(postDtoRequest.getTags().stream().map(tagService::getOrCreateByName).collect(Collectors.toSet()));
         postEntity.setUser(userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found with username: " + userDetails.getUsername())));
         postEntity = postRepository.save(postEntity);
         return postMapper.mapToDto(postEntity);

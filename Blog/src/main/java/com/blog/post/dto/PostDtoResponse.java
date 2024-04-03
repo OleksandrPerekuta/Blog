@@ -1,6 +1,8 @@
 package com.blog.post.dto;
 
+import com.blog.category.dto.CategoryDtoResponse;
 import com.blog.category.entity.CategoryEntity;
+import com.blog.tag.dto.TagDtoResponse;
 import com.blog.tag.entity.TagEntity;
 import com.blog.user.dto.UserDtoResponse;
 import lombok.*;
@@ -20,7 +22,7 @@ public class PostDtoResponse {
     private OffsetDateTime publishedAt;
     private boolean isEdited;
     private UserDtoResponse user;
-    private Set<TagEntity> tags;
-    private Set<CategoryEntity> categories;
+    private Set<TagDtoResponse> tags;
+    private Set<CategoryDtoResponse> categories;
 
 }

@@ -1,5 +1,6 @@
 package com.blog.tag.service;
 
+import com.blog.post.entity.PostEntity;
 import com.blog.tag.dto.TagDtoCreation;
 import com.blog.tag.dto.TagDtoResponse;
 import com.blog.tag.entity.TagEntity;
@@ -10,7 +11,10 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
 
 @Service
 @AllArgsConstructor
@@ -32,16 +36,21 @@ public class TagService {
         tagRepository.save(tagMapper.mapToEntity(tagDtoCreation));
     }
     @Transactional
-    public void deleteTag(Long id){
-        tagRepository.deleteById(id);
-    }
-    @Transactional
     public TagEntity getOrCreateByName(String name){
         if (tagRepository.findByName(name).isEmpty()){
             this.saveTag(new TagDtoCreation(name));
         }
         return tagRepository.findByName(name)
                 .orElseThrow(()->new EntityNotFoundException("Tag not found with name: "+name));
+    }
+    @Transactional
+    public void deleteTag(Long id) {
+        TagEntity tag = tagRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Tag not found with id: " + id));
+        for (PostEntity post : tag.getPosts()) {
+            post.getTags().remove(tag);
+        }
+        tagRepository.deleteById(id);
     }
 
 }
