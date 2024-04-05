@@ -40,4 +40,12 @@ public class CategoryService {
         CategoryEntity entity=categoryRepository.findByName(name).orElseThrow(()->new EntityNotFoundException("Category not dound with name: "+name));
         return categoryMapper.mapToDto(entity);
     }
+    @Transactional
+    public CategoryEntity getOrCreateByName(String name) {
+        if (categoryRepository.findByName(name).isEmpty()){
+            this.saveCategory(new CategoryDtoCreation(name));
+        }
+        return categoryRepository.findByName(name)
+                .orElseThrow(()->new EntityNotFoundException("Category not found with name: "+name));
+    }
 }

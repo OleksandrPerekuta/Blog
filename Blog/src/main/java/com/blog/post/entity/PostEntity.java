@@ -37,13 +37,12 @@ public class PostEntity {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     public List<TagEntity> tags=new ArrayList<>();
-    @ManyToMany(fetch = FetchType.EAGER,
-            cascade = {CascadeType.MERGE,CascadeType.PERSIST})
+    @ManyToMany(cascade = {CascadeType.MERGE,CascadeType.PERSIST})
     @JoinTable(name = "post_categories",
-            joinColumns = @JoinColumn(name = "post_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id")
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
     )
-    private Set<CategoryEntity> categories;
+    private List<CategoryEntity> categories=new ArrayList<>();
 
     @PrePersist
     private void setPublishedAt() {

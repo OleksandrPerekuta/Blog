@@ -1,5 +1,6 @@
 package com.blog.post.service;
 
+import com.blog.category.service.CategoryService;
 import com.blog.exception.InsufficientAccessLevelException;
 import com.blog.post.dto.PostDtoRequest;
 import com.blog.post.dto.PostDtoResponse;
@@ -26,6 +27,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final RoleService roleService;
     private final TagService tagService;
+    private final CategoryService categoryService;
     private final UserRepository userRepository;
     private final PostMapper postMapper;
 
@@ -40,6 +42,17 @@ public class PostService {
     public PostDtoResponse savePost(PostDtoRequest postDtoRequest, UserDetails userDetails) throws EntityNotFoundException {
         PostEntity postEntity = postMapper.mapToEntity(postDtoRequest);
         postEntity.setUser(userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found with username: " + userDetails.getUsername())));
+        postEntity.setTags(
+                postDtoRequest.getTags()
+                        .stream()
+                        .map(tag-> tagService.getOrCreateByName(tag.getName()))
+                        .toList());
+        postEntity.setCategories(
+                postDtoRequest.getCategories()
+                        .stream()
+                        .map(category -> categoryService.getOrCreateByName(category.getName()))
+                        .toList()
+        );
         postEntity = postRepository.save(postEntity);
         return postMapper.mapToDto(postEntity);
     }

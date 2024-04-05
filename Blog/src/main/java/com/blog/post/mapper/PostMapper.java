@@ -20,14 +20,13 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring", uses = {
         UserMapperImpl.class,
-        //UserEntity.class, UserDtoResponse.class,
-        //CategoryEntity.class, CategoryDtoCreation.class, CategoryDtoResponse.class,
-        //TagEntity.class, TagDtoCreation.class, TagDtoResponse.class
         CategoryMapperImpl.class,
         TagMapperImpl.class
 
 })
 public interface PostMapper {
+    @Mapping(target = "tags",ignore = true)
+    @Mapping(target = "categories",ignore = true)
     PostEntity mapToEntity(PostDtoRequest postDtoRequest);
 
     PostDtoResponse mapToDto(PostEntity postEntity);
