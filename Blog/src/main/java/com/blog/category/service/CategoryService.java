@@ -17,35 +17,41 @@ import java.util.List;
 public class CategoryService {
     private CategoryRepository categoryRepository;
     private CategoryMapper categoryMapper;
+
     @Transactional(readOnly = true)
-    public List<CategoryDtoResponse> getAll(){
-        List<CategoryEntity> entityList=categoryRepository.findAll();
+    public List<CategoryDtoResponse> getAll() {
+        List<CategoryEntity> entityList = categoryRepository.findAll();
         return entityList.stream().map(categoryMapper::mapToDto).toList();
     }
+
     @Transactional(readOnly = true)
-    public CategoryDtoResponse getCategoryById(Long id){
-        CategoryEntity entity=categoryRepository.findById(id).orElseThrow(()->new EntityNotFoundException("Category with id "+id+" is not found"));
+    public CategoryDtoResponse getCategoryById(Long id) {
+        CategoryEntity entity = categoryRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Category with id " + id + " is not found"));
         return categoryMapper.mapToDto(entity);
     }
+
     @Transactional
-    public void saveCategory(CategoryDtoCreation categoryDtoCreation){
+    public void saveCategory(CategoryDtoCreation categoryDtoCreation) {
         categoryRepository.save(categoryMapper.mapToEntity(categoryDtoCreation));
     }
+
     @Transactional
-    public void deleteCategory(Long id){
+    public void deleteCategory(Long id) {
         categoryRepository.deleteById(id);
     }
+
     @Transactional
-    public CategoryDtoResponse getByName(String name){
-        CategoryEntity entity=categoryRepository.findByName(name).orElseThrow(()->new EntityNotFoundException("Category not dound with name: "+name));
+    public CategoryDtoResponse getByName(String name) {
+        CategoryEntity entity = categoryRepository.findByName(name).orElseThrow(() -> new EntityNotFoundException("Category not dound with name: " + name));
         return categoryMapper.mapToDto(entity);
     }
+
     @Transactional
     public CategoryEntity getOrCreateByName(String name) {
-        if (categoryRepository.findByName(name).isEmpty()){
+        if (categoryRepository.findByName(name).isEmpty()) {
             this.saveCategory(new CategoryDtoCreation(name));
         }
         return categoryRepository.findByName(name)
-                .orElseThrow(()->new EntityNotFoundException("Category not found with name: "+name));
+                .orElseThrow(() -> new EntityNotFoundException("Category not found with name: " + name));
     }
 }

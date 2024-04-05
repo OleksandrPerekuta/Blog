@@ -26,36 +26,37 @@ public class PostController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getPostById(@PathVariable Long id) {
-        try{
+        try {
             return new ResponseEntity<>(postService.getPostById(id), HttpStatus.OK);
-        }catch (EntityNotFoundException e){
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping
     public ResponseEntity<?> savePost(@RequestBody @Valid PostDtoRequest postDtoRequest, Errors errors) {
         if (errors.hasErrors()) {
-            return new ResponseEntity<>(errors.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(errors.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage), HttpStatus.BAD_REQUEST);
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         System.out.println(authentication.isAuthenticated());
         System.out.println(authentication.getCredentials());
-        return new ResponseEntity<>(postService.savePost(postDtoRequest, (UserDetails) authentication.getPrincipal()),HttpStatus.CREATED);
+        return new ResponseEntity<>(postService.savePost(postDtoRequest, (UserDetails) authentication.getPrincipal()), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletePost(@PathVariable Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        try{
+        try {
             postService.deletePost(id, (UserDetails) authentication.getPrincipal());
-        }catch (InsufficientAccessLevelException e){
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+        } catch (InsufficientAccessLevelException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
     @GetMapping("/user/{username}")
-    public ResponseEntity<List<PostDtoResponse>> getPostsByUsername(@PathVariable String username){
-        return new ResponseEntity<>(postService.getPostsByUsername(username),HttpStatus.OK);
+    public ResponseEntity<List<PostDtoResponse>> getPostsByUsername(@PathVariable String username) {
+        return new ResponseEntity<>(postService.getPostsByUsername(username), HttpStatus.OK);
     }
 }

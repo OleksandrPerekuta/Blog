@@ -11,7 +11,6 @@ import com.blog.role.service.RoleService;
 import com.blog.tag.service.TagService;
 import com.blog.user.entity.UserEntity;
 import com.blog.user.repository.UserRepository;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -45,14 +44,13 @@ public class PostService {
         postEntity.setTags(
                 postDtoRequest.getTags()
                         .stream()
-                        .map(tag-> tagService.getOrCreateByName(tag.getName()))
-                        .toList());
+                        .map(tag -> tagService.getOrCreateByName(tag.getName()))
+                        .collect(Collectors.toSet()));
         postEntity.setCategories(
                 postDtoRequest.getCategories()
                         .stream()
                         .map(category -> categoryService.getOrCreateByName(category.getName()))
-                        .toList()
-        );
+                        .collect(Collectors.toSet()));
         postEntity = postRepository.save(postEntity);
         return postMapper.mapToDto(postEntity);
     }

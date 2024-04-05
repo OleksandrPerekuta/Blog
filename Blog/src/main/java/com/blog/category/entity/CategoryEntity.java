@@ -1,17 +1,17 @@
 package com.blog.category.entity;
 
 import com.blog.post.entity.PostEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Entity(name = "category")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class CategoryEntity {
@@ -19,7 +19,8 @@ public class CategoryEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    @ManyToMany(mappedBy = "categories", cascade = {CascadeType.MERGE,CascadeType.PERSIST})
-    private List<PostEntity> posts=new ArrayList<>();
+    @ManyToMany(mappedBy = "categories", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @JsonIgnore
+    private Set<PostEntity> posts = new HashSet<>();
 
 }

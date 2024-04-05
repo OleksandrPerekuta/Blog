@@ -7,8 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
 
@@ -21,6 +20,7 @@ public class TagEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    @ManyToMany(mappedBy = "tags", cascade = {CascadeType.MERGE,CascadeType.PERSIST})
-    public List<PostEntity> posts=new ArrayList<>();
+    @ManyToMany(mappedBy = "tags", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @JsonIgnore
+    public Set<PostEntity> posts = new HashSet<>();
 }
