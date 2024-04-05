@@ -10,6 +10,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
@@ -17,32 +18,38 @@ import java.util.List;
 public class RoleService {
     private RoleRepository roleRepository;
     private RoleMapper roleMapper;
+
     @Transactional(readOnly = true)
-    public List<RoleDtoResponse> getAll(){
-        List<RoleEntity> entities=roleRepository.findAll();
+    public List<RoleDtoResponse> getAll() {
+        List<RoleEntity> entities = roleRepository.findAll();
         return entities.stream().map(roleMapper::mapToDto).toList();
     }
+
     @Transactional(readOnly = true)
-    public RoleDtoResponse getRoleById(Long id){
-        RoleEntity entity=roleRepository.findById(id).orElseThrow(()->new EntityNotFoundException("Role not found with id: "+id));
+    public RoleDtoResponse getRoleById(Long id) {
+        RoleEntity entity = roleRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Role not found with id: " + id));
         return roleMapper.mapToDto(entity);
     }
+
     @Transactional
-    public void saveRole(RoleDtoCreate roleDto){
+    public void saveRole(RoleDtoCreate roleDto) {
         roleRepository.save(roleMapper.mapToEntity(roleDto));
     }
+
     @Transactional
-    public void deleteRole(Long id){
+    public void deleteRole(Long id) {
         roleRepository.deleteById(id);
     }
+
     @Transactional
-    public RoleDtoResponse changeNameRole(RoleDtoPatch patch,Long id){
-        RoleEntity entity=roleRepository.findById(id).orElseThrow(()->new EntityNotFoundException("Role not found with id: "+id));
+    public RoleDtoResponse changeNameRole(RoleDtoPatch patch, Long id) {
+        RoleEntity entity = roleRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Role not found with id: " + id));
         entity.setName(patch.getName());
         return roleMapper.mapToDto(entity);
     }
+
     @Transactional
-    public RoleEntity getRoleEntityByName(String name){
-        return roleRepository.getByName(name).orElseThrow(()->new EntityNotFoundException("Role not found with name: "+name));
+    public RoleEntity getRoleEntityByName(String name) {
+        return roleRepository.getByName(name).orElseThrow(() -> new EntityNotFoundException("Role not found with name: " + name));
     }
 }

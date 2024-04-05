@@ -11,38 +11,40 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.function.Consumer;
 
 @Service
 @AllArgsConstructor
 public class TagService {
     private TagRepository tagRepository;
     private TagMapper tagMapper;
+
     @Transactional(readOnly = true)
-    public List<TagDtoResponse> getAll(){
-        List<TagEntity> entityList=tagRepository.findAll();
+    public List<TagDtoResponse> getAll() {
+        List<TagEntity> entityList = tagRepository.findAll();
         return entityList.stream().map(tagMapper::mapToDto).toList();
     }
+
     @Transactional(readOnly = true)
-    public TagDtoResponse getTagById(Long id){
-        TagEntity entity=tagRepository.findById(id).orElseThrow(()->new EntityNotFoundException("Tag with id "+id+" is not found"));
+    public TagDtoResponse getTagById(Long id) {
+        TagEntity entity = tagRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Tag with id " + id + " is not found"));
         return tagMapper.mapToDto(entity);
     }
+
     @Transactional
-    public void saveTag(TagDtoCreation tagDtoCreation){
+    public void saveTag(TagDtoCreation tagDtoCreation) {
         tagRepository.save(tagMapper.mapToEntity(tagDtoCreation));
     }
+
     @Transactional
-    public TagEntity getOrCreateByName(String name){
-        if (tagRepository.findByName(name).isEmpty()){
+    public TagEntity getOrCreateByName(String name) {
+        if (tagRepository.findByName(name).isEmpty()) {
             this.saveTag(new TagDtoCreation(name));
         }
         return tagRepository.findByName(name)
-                .orElseThrow(()->new EntityNotFoundException("Tag not found with name: "+name));
+                .orElseThrow(() -> new EntityNotFoundException("Tag not found with name: " + name));
     }
+
     @Transactional
     public void deleteTag(Long id) {
         TagEntity tag = tagRepository.findById(id)

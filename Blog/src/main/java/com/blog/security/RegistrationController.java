@@ -1,8 +1,8 @@
 package com.blog.security;
 
 import com.blog.user.dto.AdminDtoRegister;
-import com.blog.user.dto.UserDtoRegister;
 import com.blog.user.dto.UserDtoLogin;
+import com.blog.user.dto.UserDtoRegister;
 import com.blog.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -23,7 +23,7 @@ public class RegistrationController {
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody @Valid UserDtoRegister userDto, Errors errors) {
         if (errors.hasErrors()) {
-            return new ResponseEntity<>(errors.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(errors.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage), HttpStatus.BAD_REQUEST);
         }
         try {
             String activationUrl = userService.createUser(userDto);
@@ -34,9 +34,9 @@ public class RegistrationController {
     }
 
     @PostMapping("/register/admin")
-    public ResponseEntity<?> registerAdmin(@RequestBody @Valid AdminDtoRegister adminDto,Errors errors) {
+    public ResponseEntity<?> registerAdmin(@RequestBody @Valid AdminDtoRegister adminDto, Errors errors) {
         if (errors.hasErrors()) {
-            return new ResponseEntity<>(errors.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(errors.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage), HttpStatus.BAD_REQUEST);
         }
         try {
             String activationUrl = userService.createAdmin(adminDto);
@@ -52,14 +52,14 @@ public class RegistrationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody @Valid UserDtoLogin request,Errors errors) {
+    public ResponseEntity<?> login(@RequestBody @Valid UserDtoLogin request, Errors errors) {
         if (errors.hasErrors()) {
-            return new ResponseEntity<>(errors.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(errors.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage), HttpStatus.BAD_REQUEST);
         }
-        try{
+        try {
             return ResponseEntity.ok(userService.authenticateUser(request));
-        }catch (EntityNotFoundException e){
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 

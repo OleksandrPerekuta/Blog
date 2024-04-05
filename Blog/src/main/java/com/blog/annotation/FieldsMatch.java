@@ -14,9 +14,12 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = FieldsMatchValidator.class)
 public @interface FieldsMatch {
     String message() default "Fields do not match";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 
     String field();
+
     String matchingField();
 }

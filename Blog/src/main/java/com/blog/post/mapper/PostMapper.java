@@ -22,11 +22,10 @@ import org.mapstruct.Mapping;
         UserMapperImpl.class,
         CategoryMapperImpl.class,
         TagMapperImpl.class
-
 })
 public interface PostMapper {
-    @Mapping(target = "tags",ignore = true)
-    @Mapping(target = "categories",ignore = true)
+    @Mapping(target = "tags", ignore = true)
+    @Mapping(target = "categories", ignore = true)
     PostEntity mapToEntity(PostDtoRequest postDtoRequest);
 
     PostDtoResponse mapToDto(PostEntity postEntity);

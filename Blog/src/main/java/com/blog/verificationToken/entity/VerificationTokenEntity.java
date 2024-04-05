@@ -20,11 +20,12 @@ public class VerificationTokenEntity {
     private Long id;
     private OffsetDateTime expirationDate;
     private String token;
-    @ManyToOne(optional = false,fetch = FetchType.LAZY)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserEntity user;
+
     @PrePersist
-    private void initializeValues(){
-        expirationDate= OffsetDateTime.now().plusDays(1);
+    private void initializeValues() {
+        expirationDate = OffsetDateTime.now().plusDays(1);
     }
 }

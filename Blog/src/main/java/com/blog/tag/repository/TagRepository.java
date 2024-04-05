@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface TagRepository extends JpaRepository<TagEntity,Long> {
+public interface TagRepository extends JpaRepository<TagEntity, Long> {
     Optional<TagEntity> findByName(String name);
 }

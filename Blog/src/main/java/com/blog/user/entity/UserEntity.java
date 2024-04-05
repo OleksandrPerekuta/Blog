@@ -41,8 +41,11 @@ public class UserEntity implements UserDetails {
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
     private List<PostEntity> posts;
+
     @PrePersist
-    private void setEnabled(){isEnabled=false;}
+    private void setEnabled() {
+        isEnabled = false;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

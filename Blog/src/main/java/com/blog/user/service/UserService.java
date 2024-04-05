@@ -7,7 +7,10 @@ import com.blog.role.entity.RoleEntity;
 import com.blog.role.repository.RoleRepository;
 import com.blog.security.AuthenticationTokenResponse;
 import com.blog.security.JwtService;
-import com.blog.user.dto.*;
+import com.blog.user.dto.AdminDtoRegister;
+import com.blog.user.dto.UserDtoLogin;
+import com.blog.user.dto.UserDtoPasswordReset;
+import com.blog.user.dto.UserDtoRegister;
 import com.blog.user.entity.UserEntity;
 import com.blog.user.mapper.UserMapper;
 import com.blog.user.repository.UserRepository;
@@ -73,7 +76,7 @@ public class UserService {
         userEntity.setEmail(userEntity.getEmail().toLowerCase());
         RoleEntity userRole = roleRepository.getByName("ROLE_USER").orElseThrow(() -> new EntityNotFoundException("Role with name \"USER\" is not found"));
         RoleEntity adminRole = roleRepository.getByName("ROLE_ADMIN").orElseThrow(() -> new EntityNotFoundException("Role with name \"ADMIN\" is not found"));
-        userEntity.setRoles(Set.of(userRole,adminRole));
+        userEntity.setRoles(Set.of(userRole, adminRole));
         userRepository.save(userEntity);
         return generateLinkWithVerificationToken(userEntity);
     }
@@ -124,7 +127,7 @@ public class UserService {
         return "Password changed";
     }
 
-    public AuthenticationTokenResponse authenticateUser(UserDtoLogin request) throws EntityNotFoundException{
+    public AuthenticationTokenResponse authenticateUser(UserDtoLogin request) throws EntityNotFoundException {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         UserEntity user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         String jwtToken = jwtService.generateToken(user);

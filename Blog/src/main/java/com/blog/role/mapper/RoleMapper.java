@@ -8,5 +8,6 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface RoleMapper {
     RoleDtoResponse mapToDto(RoleEntity entity);
+
     RoleEntity mapToEntity(RoleDtoCreate dtoCreate);
 }
