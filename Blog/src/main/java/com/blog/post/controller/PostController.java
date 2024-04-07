@@ -1,5 +1,6 @@
 package com.blog.post.controller;
 
+import com.blog.exception.CategoryException;
 import com.blog.exception.InsufficientAccessLevelException;
 import com.blog.post.dto.PostDtoRequest;
 import com.blog.post.dto.PostDtoResponse;
@@ -39,9 +40,11 @@ public class PostController {
             return new ResponseEntity<>(errors.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage), HttpStatus.BAD_REQUEST);
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(authentication.isAuthenticated());
-        System.out.println(authentication.getCredentials());
-        return new ResponseEntity<>(postService.savePost(postDtoRequest, (UserDetails) authentication.getPrincipal()), HttpStatus.CREATED);
+        try{
+            return new ResponseEntity<>(postService.savePost(postDtoRequest, (UserDetails) authentication.getPrincipal()), HttpStatus.CREATED);
+        }catch (EntityNotFoundException | CategoryException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+        }
     }
 
     @DeleteMapping("/{id}")

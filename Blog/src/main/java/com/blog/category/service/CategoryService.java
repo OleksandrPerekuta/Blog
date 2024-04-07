@@ -44,11 +44,15 @@ public class CategoryService {
     }
 
     @Transactional
-    public CategoryDtoResponse getByName(String name) {
-        CategoryEntity entity = categoryRepository.findByName(name).orElseThrow(() -> new EntityNotFoundException("Category not dound with name: " + name));
+    public CategoryDtoResponse getDtoByName(String name) {
+        CategoryEntity entity = categoryRepository.findByName(name).orElseThrow(() -> new EntityNotFoundException("Category not found with name: " + name));
         return categoryMapper.mapToDto(entity);
     }
 
+    @Transactional
+    public CategoryEntity getEntityByName(String name) throws EntityNotFoundException{
+        return categoryRepository.findByName(name).orElseThrow(() -> new EntityNotFoundException("Category not found with name: " + name));
+    }
     @Transactional
     public CategoryEntity getOrCreateByName(String name) {
         if (categoryRepository.findByName(name).isEmpty()) {

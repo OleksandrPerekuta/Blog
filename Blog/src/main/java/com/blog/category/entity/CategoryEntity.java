@@ -3,10 +3,12 @@ package com.blog.category.entity;
 import com.blog.post.entity.PostEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 
 @Entity(name = "category")
@@ -20,7 +22,12 @@ public class CategoryEntity {
     private Long id;
     private String name;
     private boolean isActive;
-    @ManyToMany(mappedBy = "categories", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JsonIgnore
-    private Set<PostEntity> posts = new HashSet<>();
+    @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
+    private List<PostEntity> posts;
+
+    @PrePersist
+    public void setIsActive() {
+        this.isActive = true;
+    }
 }

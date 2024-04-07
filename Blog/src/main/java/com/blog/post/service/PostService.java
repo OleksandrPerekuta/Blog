@@ -1,6 +1,8 @@
 package com.blog.post.service;
 
+import com.blog.category.entity.CategoryEntity;
 import com.blog.category.service.CategoryService;
+import com.blog.exception.CategoryException;
 import com.blog.exception.InsufficientAccessLevelException;
 import com.blog.post.dto.PostDtoRequest;
 import com.blog.post.dto.PostDtoResponse;
@@ -38,7 +40,7 @@ public class PostService {
     }
 
     @Transactional
-    public PostDtoResponse savePost(PostDtoRequest postDtoRequest, UserDetails userDetails) throws EntityNotFoundException {
+    public PostDtoResponse savePost(PostDtoRequest postDtoRequest, UserDetails userDetails) throws EntityNotFoundException, CategoryException {
         PostEntity postEntity = postMapper.mapToEntity(postDtoRequest);
         postEntity.setUser(userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found with username: " + userDetails.getUsername())));
         postEntity.setTags(
@@ -46,11 +48,12 @@ public class PostService {
                         .stream()
                         .map(tag -> tagService.getOrCreateByName(tag.getName()))
                         .collect(Collectors.toSet()));
-        postEntity.setCategories(
-                postDtoRequest.getCategories()
-                        .stream()
-                        .map(category -> categoryService.getOrCreateByName(category.getName()))
-                        .collect(Collectors.toSet()));
+        CategoryEntity entity =categoryService.getEntityByName(postDtoRequest.getCategory());
+        if (entity.isActive()){
+            postEntity.setCategory(entity);
+        }else{
+            throw new CategoryException("Post cannot be added to a inactive category");
+        }
         postEntity = postRepository.save(postEntity);
         return postMapper.mapToDto(postEntity);
     }
