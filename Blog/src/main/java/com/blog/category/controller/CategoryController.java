@@ -20,13 +20,12 @@ public class CategoryController {
 
     @PostMapping
     public ResponseEntity<?> createCategory(@RequestBody CategoryDtoCreation categoryDtoCreation) {
-        categoryService.saveCategory(categoryDtoCreation);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(categoryService.saveCategory(categoryDtoCreation),HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteCategory(@PathVariable Long id) {
-        categoryService.deleteCategory(id);
+    public ResponseEntity<?> deactivateCategory(@PathVariable Long id) {
+        categoryService.deactivateCategory(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

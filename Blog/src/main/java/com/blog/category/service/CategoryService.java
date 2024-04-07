@@ -5,7 +5,6 @@ import com.blog.category.dto.CategoryDtoResponse;
 import com.blog.category.entity.CategoryEntity;
 import com.blog.category.mapper.CategoryMapper;
 import com.blog.category.repository.CategoryRepository;
-import com.blog.post.entity.PostEntity;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,18 +31,16 @@ public class CategoryService {
     }
 
     @Transactional
-    public void saveCategory(CategoryDtoCreation categoryDtoCreation) {
-        categoryRepository.save(categoryMapper.mapToEntity(categoryDtoCreation));
+    public CategoryDtoResponse saveCategory(CategoryDtoCreation categoryDtoCreation) {
+        return categoryMapper.mapToDto(
+                categoryRepository.save(categoryMapper.mapToEntity(categoryDtoCreation)));
     }
 
     @Transactional
-    public void deleteCategory(Long id) {
+    public void deactivateCategory(Long id) {
         CategoryEntity category = categoryRepository.findById(id)
                         .orElseThrow(()->new EntityNotFoundException("Category not found with id: "+id));
-        for (PostEntity post : category.getPosts()){
-            post.getCategories().remove(category);
-        }
-        categoryRepository.deleteById(id);
+        category.setActive(false);
     }
 
     @Transactional

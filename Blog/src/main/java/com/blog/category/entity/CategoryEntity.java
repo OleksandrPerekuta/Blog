@@ -19,8 +19,8 @@ public class CategoryEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    private boolean isActive;
     @ManyToMany(mappedBy = "categories", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JsonIgnore
     private Set<PostEntity> posts = new HashSet<>();
-
 }
