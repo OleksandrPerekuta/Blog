@@ -36,6 +36,7 @@ public class CategoryService {
                 categoryRepository.save(categoryMapper.mapToEntity(categoryDtoCreation)));
     }
 
+    //todo: change logic so only admins can deactivate
     @Transactional
     public void deactivateCategory(Long id) {
         CategoryEntity category = categoryRepository.findById(id)

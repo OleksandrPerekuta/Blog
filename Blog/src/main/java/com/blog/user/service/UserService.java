@@ -68,7 +68,7 @@ public class UserService {
             throw new UserAlreadyExistsException("User with this email already exists");
         }
         String key = new String(Files.readAllBytes(Path.of("src/main/resources/key.txt")));
-        System.out.println("KEY IS " + key);
+        System.out.println("KEY IS " + key);// xd :)
         if (!adminDtoRegister.getSecret().equals(key)) {
             throw new TokenException("Key is not correct");
         }
@@ -117,8 +117,10 @@ public class UserService {
         return "Account activated";
     }
 
+    //todo: change logic so link would be sent on demand as a token an only then password would be reset
     public String resetPassword(UserDtoPasswordReset userDtoPasswordReset, Long id) throws EntityNotFoundException, UserNotActivatedException {
-        UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User with id: " + id + " not found"));
+        UserEntity userEntity = userRepository.findById(id)
+                                            .orElseThrow(() -> new EntityNotFoundException("User with id: " + id + " not found"));
         if (!userEntity.isEnabled()) {
             throw new UserNotActivatedException("User is not activated");
         }
@@ -128,10 +130,21 @@ public class UserService {
     }
 
     public AuthenticationTokenResponse authenticateUser(UserDtoLogin request) throws EntityNotFoundException {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-        UserEntity user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UsernamePasswordAuthenticationToken pat=new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
+        //add delay in case of incorrect credentials to prevent brute force
+        if (!pat.isAuthenticated()){
+            try {
+                Thread.sleep(2 * 1000); // 2 seconds
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        authenticationManager.authenticate(pat);
+        UserEntity user = userRepository.findByEmail(request.getEmail())
+                                            .orElseThrow(() -> new EntityNotFoundException("User not found"));
         String jwtToken = jwtService.generateToken(user);
         return AuthenticationTokenResponse.builder().token(jwtToken).build();
     }
+    //todo: add ability to change username for a user
 
 }

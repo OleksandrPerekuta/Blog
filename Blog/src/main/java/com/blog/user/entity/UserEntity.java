@@ -1,5 +1,6 @@
 package com.blog.user.entity;
 
+import com.blog.comment.entity.CommentEntity;
 import com.blog.post.entity.PostEntity;
 import com.blog.role.entity.RoleEntity;
 import com.blog.verificationToken.entity.VerificationTokenEntity;
@@ -41,6 +42,9 @@ public class UserEntity implements UserDetails {
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
     private List<PostEntity> posts;
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
+    private List<CommentEntity> comments;
 
     @PrePersist
     private void setEnabled() {
